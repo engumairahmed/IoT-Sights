@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Hub GPIO Config</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
+        h1 { text-align: center; }
+        .config-form { background: #fff; padding: 20px; border-radius: 10px; max-width: 500px; margin: auto; box-shadow: 0px 0px 10px rgba(0,0,0,0.2);}
+        label { display: block; margin-top: 10px; }
+        input[type=number] { width: 100%; padding: 8px; margin-top: 5px; }
+        button { margin-top: 20px; width: 100%; padding: 10px; background: #007BFF; color: white; border: none; cursor: pointer; border-radius: 5px; }
+        button:hover { background: #0056b3; }
+        #status { margin-top: 10px; text-align: center; color: green; }
+    </style>
+</head>
+<body>
+
+<h1>Smart Hub GPIO Configuration</h1>
+<div class="config-form">
+    <label for="triggerPin">Water Sensor Trigger Pin:</label>
+    <input type="number" id="triggerPin" placeholder="e.g., 32">
+
+    <label for="echoPin">Water Sensor Echo Pin:</label>
+    <input type="number" id="echoPin" placeholder="e.g., 35">
+
+    <label for="motorPin">Water Pump Relay Pin:</label>
+    <input type="number" id="motorPin" placeholder="e.g., 18">
+
+    <label for="ctPin">Current Transformer (CT) Pin:</label>
+    <input type="number" id="ctPin" placeholder="e.g., 21">
+
+    <label for="greenLedPin">Green Status LED Pin:</label>
+    <input type="number" id="greenLedPin" placeholder="e.g., 17">
+
+    <label for="redLedPin">Red Status LED Pin:</label>
+    <input type="number" id="redLedPin" placeholder="e.g., 16">
+
+    <label for="buttonPin">Data Toggle Button Pin:</label>
+    <input type="number" id="buttonPin" placeholder="e.g., 27">
+
+    <button onclick="saveConfig()">Save GPIO Configuration</button>
+    <div id="status"></div>
+</div>
+
+<script>
+function saveConfig() {
+    const config = {
+        triggerPin: parseInt(document.getElementById("triggerPin").value),
+        echoPin: parseInt(document.getElementById("echoPin").value),
+        motorPin: parseInt(document.getElementById("motorPin").value),
+        ctPin: parseInt(document.getElementById("ctPin").value),
+        greenLedPin: parseInt(document.getElementById("greenLedPin").value),
+        redLedPin: parseInt(document.getElementById("redLedPin").value),
+        buttonPin: parseInt(document.getElementById("buttonPin").value)
+    };
+
+    for (let key in config) {
+        if (isNaN(config[key])) {
+            document.getElementById("status").style.color = "red";
+            document.getElementById("status").innerText = "Please fill all fields with valid GPIO numbers!";
+            return;
+        }
+    }
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/save-gpio-config", true);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if(xhr.status === 200){
+                document.getElementById("status").style.color = "green";
+                document.getElementById("status").innerText = "GPIO Configuration Saved! Device will restart...";
+            } else {
+                document.getElementById("status").style.color = "red";
+                document.getElementById("status").innerText = "Error saving GPIO config.";
+            }
+        }
+    };
+    xhr.send(JSON.stringify(config));
+}
+</script>
+
+</body>
+</html>

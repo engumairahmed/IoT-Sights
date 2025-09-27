@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modular IoT Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            transition: background-color 0.5s ease-in-out;
+        }
+        .container {
+            max-width: 800px;
+        }
+        .module-card {
+            min-height: 150px;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .back-button {
+            transition: transform 0.2s ease-in-out;
+        }
+        .back-button:hover {
+            transform: translateX(-5px);
+        }
+        .meter-dial {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 8px solid #cbd5e1;
+            position: relative;
+            background-color: #f8fafc;
+        }
+        .meter-needle {
+            width: 50%;
+            height: 4px;
+            background-color: #ef4444;
+            position: absolute;
+            top: calc(50% - 2px);
+            left: 50%;
+            transform-origin: 0% 50%;
+            transition: transform 0.5s ease-in-out;
+        }
+        .meter-center {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background-color: #334155;
+            border-radius: 50%;
+            top: calc(50% - 8px);
+            left: calc(50% - 8px);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="container bg-white rounded-3xl shadow-xl p-8 flex flex-col items-center">
+
+        <div class="w-full flex justify-between items-center mb-6">
+            <h1 id="main-title" class="text-3xl font-bold text-gray-800">My IoT Dashboard</h1>
+            <div id="status-indicator" class="w-4 h-4 rounded-full bg-green-500 transition-colors duration-300"></div>
+        </div>
+
+        <div id="dashboard-view" class="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <div data-module="street-light" class="module-card bg-gray-100 rounded-2xl shadow-md p-6 flex flex-col items-center justify-center text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-yellow-500 mb-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><path d="M12 6a6 6 0 0 0-6 6h12a6 6 0 0 0-6-6z"/>
+                </svg>
+                <h2 class="text-xl font-bold text-gray-800">Street Light</h2>
+                <p id="street-light-status" class="text-sm font-semibold mt-2 px-3 py-1 rounded-full text-white bg-green-500">ON</p>
+            </div>
+
+            <div data-module="water-level" class="module-card bg-gray-100 rounded-2xl shadow-md p-6 flex flex-col items-center justify-center text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-blue-500 mb-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-8h4v2h-4v-2z"/>
+                </svg>
+                <h2 class="text-xl font-bold text-gray-800">Water Level</h2>
+                <p id="water-level-status" class="text-sm font-semibold mt-2 px-3 py-1 rounded-full text-white bg-blue-500">Normal</p>
+            </div>
+
+            <div data-module="battery-level" class="module-card bg-gray-100 rounded-2xl shadow-md p-6 flex flex-col items-center justify-center text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-green-500 mb-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><path d="M12 4a8 8 0 0 0-8 8h16a8 8 0 0 0-8-8z"/>
+                </svg>
+                <h2 class="text-xl font-bold text-gray-800">Battery Level</h2>
+                <p id="battery-level-status" class="text-sm font-semibold mt-2 px-3 py-1 rounded-full text-white bg-green-500">85%</p>
+            </div>
+
+            <div data-module="energy-monitor" class="module-card bg-gray-100 rounded-2xl shadow-md p-6 flex flex-col items-center justify-center text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-red-500 mb-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><path d="M12 4a8 8 0 0 0-8 8h16a8 8 0 0 0-8-8z"/>
+                </svg>
+                <h2 class="text-xl font-bold text-gray-800">Energy Monitor</h2>
+                <p id="energy-monitor-status" class="text-sm font-semibold mt-2 px-3 py-1 rounded-full text-white bg-red-500">250W</p>
+            </div>
+
+        </div>
+
+        <div id="detail-view" class="w-full" style="display: none;">
+            <button id="back-button" class="back-button text-gray-600 mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/>
+                </svg>
+                Back to Dashboard
+            </button>
+            <div id="module-content">
+                </div>
+        </div>
+
+        <div id="message-box" class="mt-8 w-full p-4 text-center text-sm font-semibold rounded-xl" style="display: none;"></div>
+
+    </div>
+
+    <script>
+        // Use an IIFE to avoid global scope pollution
+        (function() {
+            // --- Step 1: Define Your Blynk Auth Token and Virtual Pins ---
+            const BLYNK_AUTH_TOKEN = "SPrX61CtwXmZ97z56QahFNFC20AydfmX";
+            const BLYNK_PINS = {
+                power: 0,
+                cumulativeEnergy: 1,
+                waterLevel: 2,
+            };
+
+            // --- DOM Element and State Variables ---
+            const dashboardView = document.getElementById('dashboard-view');
+            const detailView = document.getElementById('detail-view');
+            const backButton = document.getElementById('back-button');
+            const moduleContent = document.getElementById('module-content');
+            const mainTitle = document.getElementById('main-title');
+            const messageBox = document.getElementById('message-box');
+            const moduleCards = document.querySelectorAll('.module-card');
+            
+            let currentModule = null;
+
+            // --- Function to Show Messages in the UI ---
+            function showMessage(message, type = 'info') {
+                messageBox.textContent = message;
+                messageBox.style.display = 'block';
+                if (type === 'success') {
+                    messageBox.className = "mt-8 w-full p-4 text-center text-sm font-semibold rounded-xl bg-green-200 text-green-800";
+                } else if (type === 'error') {
+                    messageBox.className = "mt-8 w-full p-4 text-center text-sm font-semibold rounded-xl bg-red-200 text-red-800";
+                } else {
+                    messageBox.className = "mt-8 w-full p-4 text-center text-sm font-semibold rounded-xl bg-blue-200 text-blue-800";
+                }
+                setTimeout(() => {
+                    messageBox.style.display = 'none';
+                }, 3000);
+            }
+
+            // --- Module-Specific Data and Logic ---
+            const moduleData = {
+                'street-light': {
+                    title: 'Street Light Module',
+                    isLightOn: true,
+                    currentLightLevel: 450,
+                    mode: 'auto',
+                    render: function() {
+                        const isLightOn = this.isLightOn;
+                        const statusColor = isLightOn ? 'bg-green-500' : 'bg-red-500';
+                        const statusText = isLightOn ? 'ON' : 'OFF';
+                        const buttonText = isLightOn ? 'Turn Off' : 'Turn On';
+                        const isAutoMode = this.mode === 'auto';
+                        const autoBtnClass = isAutoMode ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800';
+                        const manualBtnClass = !isAutoMode ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800';
+
+                        return `
+                            <div class="flex flex-col items-center mb-8">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mb-4 text-yellow-500" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><path d="M12 6a6 6 0 0 0-6 6h12a6 6 0 0 0-6-6z"/>
+                                </svg>
+                                <p class="text-sm text-gray-500 font-semibold mb-2">Ambient Light Sensor</p>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-4xl font-extrabold text-gray-800">${this.currentLightLevel}</span>
+                                    <span class="text-lg text-gray-500">lux</span>
+                                </div>
+                            </div>
+                            <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-gray-100 p-4 rounded-xl flex items-center justify-between">
+                                    <p class="text-gray-600 font-semibold">Light Status:</p>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-3 h-3 rounded-full ${statusColor}"></div>
+                                        <span class="text-gray-800 font-bold">${statusText}</span>
+                                    </div>
+                                </div>
+                                <button id="toggle-button" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-blue-700 transition transform hover:scale-105 active:scale-95 duration-200">
+                                    ${buttonText}
+                                </button>
+                            </div>
+                            <div class="w-full mt-4 flex justify-center items-center space-x-4">
+                                <span class="text-gray-600 font-semibold">Mode:</span>
+                                <button id="mode-auto" class="py-2 px-4 rounded-xl font-semibold hover:bg-gray-300 transition-colors duration-200 ${autoBtnClass}">Auto</button>
+                                <button id="mode-manual" class="py-2 px-4 rounded-xl font-semibold hover:bg-gray-300 transition-colors duration-200 ${manualBtnClass}">Manual</button>
+                            </div>
+                        `;
+                    },
+                    attachEvents: function() {
+                        document.getElementById('toggle-button').addEventListener('click', () => {
+                            if (this.mode === 'auto') {
+                                showMessage("Switch to Manual Mode to use the button.", 'info');
+                                return;
+                            }
+                            this.isLightOn = !this.isLightOn;
+                            renderDetailView('street-light');
+                            const action = this.isLightOn ? 'on' : 'off';
+                            showMessage(`Manually turning light ${action}.`, 'success');
+                        });
+                        document.getElementById('mode-auto').addEventListener('click', () => {
+                            this.mode = 'auto';
+                            renderDetailView('street-light');
+                            showMessage("Switched to Auto Mode.", 'info');
+                        });
+                        document.getElementById('mode-manual').addEventListener('click', () => {
+                            this.mode = 'manual';
+                            renderDetailView('street-light');
+                            showMessage("Switched to Manual Mode.", 'info');
+                        });
+                    }
+                },
+                'water-level': {
+                    title: 'Water Level Module',
+                    level: 75,
+                    status: 'Normal',
+                    render: function() {
+                        const statusColor = this.level > 90 ? 'bg-red-500' : (this.level < 20 ? 'bg-yellow-500' : 'bg-blue-500');
+                        this.status = this.level > 90 ? 'High' : (this.level < 20 ? 'Low' : 'Normal');
+                        return `
+                            <div class="flex flex-col items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-blue-500 mb-4" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-8h4v2h-4v-2z"/>
+                                </svg>
+                                <p class="text-sm text-gray-500 font-semibold mb-2">Tank Level</p>
+                                <div class="w-full h-8 bg-gray-200 rounded-full overflow-hidden">
+                                    <div class="h-full bg-blue-500 transition-all duration-500 ease-in-out" style="width: ${this.level}%"></div>
+                                </div>
+                                <div class="flex items-center space-x-2 mt-4">
+                                    <span class="text-4xl font-extrabold text-gray-800">${this.level}</span>
+                                    <span class="text-lg text-gray-500">%</span>
+                                </div>
+                                <div class="w-full flex justify-center mt-6">
+                                    <p class="text-sm font-semibold px-3 py-1 rounded-full text-white ${statusColor}">${this.status}</p>
+                                </div>
+                            </div>
+                        `;
+                    },
+                    attachEvents: function() {}
+                },
+                'battery-level': {
+                    title: 'Battery Level Module',
+                    level: 85,
+                    status: 'Normal',
+                    render: function() {
+                        const statusColor = this.level < 20 ? 'bg-red-500' : (this.level < 50 ? 'bg-yellow-500' : 'bg-green-500');
+                        this.status = this.level < 20 ? 'Low' : (this.level < 50 ? 'Medium' : 'Normal');
+                        return `
+                            <div class="flex flex-col items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-green-500 mb-4" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><path d="M12 4a8 8 0 0 0-8 8h16a8 8 0 0 0-8-8z"/>
+                                </svg>
+                                <p class="text-sm text-gray-500 font-semibold mb-2">Charge Level</p>
+                                <div class="w-full h-8 bg-gray-200 rounded-full overflow-hidden">
+                                    <div class="h-full ${statusColor} transition-all duration-500 ease-in-out" style="width: ${this.level}%"></div>
+                                </div>
+                                <div class="flex items-center space-x-2 mt-4">
+                                    <span class="text-4xl font-extrabold text-gray-800">${this.level}</span>
+                                    <span class="text-lg text-gray-500">%</span>
+                                </div>
+                                <div class="w-full flex justify-center mt-6">
+                                    <p class="text-sm font-semibold px-3 py-1 rounded-full text-white ${statusColor}">${this.status}</p>
+                                </div>
+                            </div>
+                        `;
+                    },
+                    attachEvents: function() {}
+                },
+                'energy-monitor': {
+                    title: 'Energy Monitor Module',
+                    power: 0,
+                    cumulativeEnergy: 0,
+                    costPerKwh: 0.15,
+                    render: function() {
+                        const needleRotation = (this.power / 1000) * 180 - 90;
+                        const dailyCost = (this.cumulativeEnergy * this.costPerKwh).toFixed(2);
+                        return `
+                            <div class="flex flex-col items-center mb-8">
+                                <div class="meter-dial">
+                                    <div class="meter-needle" style="transform: rotate(${needleRotation}deg)"></div>
+                                    <div class="meter-center"></div>
+                                    <div class="absolute inset-0 flex flex-col justify-end items-center pb-8">
+                                        <p class="text-sm text-gray-400">0W</p>
+                                        <p class="text-sm text-gray-400 absolute top-1/2 left-0 pl-4 transform -translate-y-1/2">500W</p>
+                                        <p class="text-sm text-gray-400 absolute top-1/2 right-0 pr-4 transform -translate-y-1/2">1000W</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2 mt-4">
+                                    <span id="power-value" class="text-5xl font-extrabold text-red-600">${this.power.toFixed(2)}</span>
+                                    <span class="text-xl font-bold text-gray-500">W</span>
+                                </div>
+                            </div>
+                            <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-gray-100 p-4 rounded-xl flex flex-col items-center text-center">
+                                    <p class="text-sm text-gray-600 font-semibold mb-2">Total Units</p>
+                                    <div class="flex items-center space-x-1">
+                                        <span class="text-2xl font-bold text-gray-800">${this.cumulativeEnergy.toFixed(2)}</span>
+                                        <span class="text-sm text-gray-500">kWh</span>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-100 p-4 rounded-xl flex flex-col items-center text-center">
+                                    <p class="text-sm text-gray-600 font-semibold mb-2">Total Cost</p>
+                                    <div class="flex items-center space-x-1">
+                                        <span class="text-2xl font-bold text-gray-800">$${dailyCost}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    },
+                    attachEvents: function() {}
+                }
+            };
+            
+            // --- Function to Fetch Data from Blynk API ---
+            async function getBlynkData(virtualPin) {
+                const url = `https://blynk.cloud/external/api/get?token=${BLYNK_AUTH_TOKEN}&v${virtualPin}`;
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        console.error(`Blynk API error! Status: ${response.status}`);
+                        return null;
+                    }
+                    const data = await response.text();
+                    return parseFloat(data);
+                } catch (error) {
+                    console.error("Error fetching data from Blynk:", error);
+                    return null;
+                }
+            }
+
+            // --- UI Rendering Functions ---
+            function renderDashboardView() {
+                mainTitle.textContent = "My IoT Dashboard";
+                dashboardView.style.display = 'grid';
+                detailView.style.display = 'none';
+
+                // Update status on main dashboard view
+                document.getElementById('street-light-status').textContent = moduleData['street-light'].isLightOn ? 'ON' : 'OFF';
+                document.getElementById('street-light-status').className = `text-sm font-semibold mt-2 px-3 py-1 rounded-full text-white ${moduleData['street-light'].isLightOn ? 'bg-green-500' : 'bg-red-500'}`;
+
+                document.getElementById('water-level-status').textContent = moduleData['water-level'].status;
+                const waterColor = moduleData['water-level'].level > 90 ? 'bg-red-500' : (moduleData['water-level'].level < 20 ? 'bg-yellow-500' : 'bg-blue-500');
+                document.getElementById('water-level-status').className = `text-sm font-semibold mt-2 px-3 py-1 rounded-full text-white ${waterColor}`;
+
+                document.getElementById('battery-level-status').textContent = `${moduleData['battery-level'].level}%`;
+                const batteryColor = moduleData['battery-level'].level < 20 ? 'bg-red-500' : (moduleData['battery-level'].level < 50 ? 'bg-yellow-500' : 'bg-green-500');
+                document.getElementById('battery-level-status').className = `text-sm font-semibold mt-2 px-3 py-1 rounded-full text-white ${batteryColor}`;
+                
+                document.getElementById('energy-monitor-status').textContent = `${moduleData['energy-monitor'].power.toFixed(2)}W`;
+                document.getElementById('energy-monitor-status').className = `text-sm font-semibold mt-2 px-3 py-1 rounded-full text-white bg-red-500`;
+            }
+
+            function renderDetailView(moduleId) {
+                currentModule = moduleId;
+                const module = moduleData[moduleId];
+                if (!module) return;
+
+                mainTitle.textContent = module.title;
+                dashboardView.style.display = 'none';
+                detailView.style.display = 'block';
+                moduleContent.innerHTML = module.render();
+                module.attachEvents();
+            }
+
+            // --- Update Data from Blynk API ---
+            async function updateBlynkData() {
+                const powerValue = await getBlynkData(BLYNK_PINS.power);
+                if (powerValue !== null) {
+                    moduleData['energy-monitor'].power = powerValue;
+                }
+                const cumulativeEnergyValue = await getBlynkData(BLYNK_PINS.cumulativeEnergy);
+                if (cumulativeEnergyValue !== null) {
+                    moduleData['energy-monitor'].cumulativeEnergy = cumulativeEnergyValue;
+                }
+
+                // Simulate other module data since we don't have Blynk pins for them yet
+                const streetLightModule = moduleData['street-light'];
+                const LIGHT_THRESHOLD = 300;
+                streetLightModule.currentLightLevel = Math.max(0, streetLightModule.currentLightLevel + (Math.random() - 0.5) * 50);
+                if (streetLightModule.mode === 'auto') {
+                    if (streetLightModule.currentLightLevel < LIGHT_THRESHOLD && !streetLightModule.isLightOn) {
+                        streetLightModule.isLightOn = true;
+                    } else if (streetLightModule.currentLightLevel > LIGHT_THRESHOLD && streetLightModule.isLightOn) {
+                        streetLightModule.isLightOn = false;
+                    }
+                }
+                moduleData['water-level'].level = Math.min(100, Math.max(0, moduleData['water-level'].level + (Math.random() - 0.5) * 5));
+                moduleData['battery-level'].level = Math.min(100, Math.max(0, moduleData['battery-level'].level - 0.5));
+                
+                // Re-render the current view to show updates
+                if (detailView.style.display === 'block') {
+                    renderDetailView(currentModule);
+                } else {
+                    renderDashboardView();
+                }
+            }
+            
+            // --- Event Listeners ---
+            moduleCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const moduleId = card.dataset.module;
+                    renderDetailView(moduleId);
+                });
+            });
+
+            backButton.addEventListener('click', renderDashboardView);
+
+            // --- Initialization ---
+            function init() {
+                renderDashboardView();
+                setInterval(updateBlynkData, 5000);
+            }
+
+            window.onload = init;
+        })();
+    </script>
+
+</body>
+</html>
