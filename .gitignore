@@ -3,5 +3,7 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
-layout.txt
 .vscode/extensions
+
+layout.txt
+config.h

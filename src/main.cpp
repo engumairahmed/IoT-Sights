@@ -1,6 +1,4 @@
-#define BLYNK_TEMPLATE_ID "TMPL6fZx5WVVH"
-#define BLYNK_TEMPLATE_NAME "Smart Hub"
-#define BLYNK_AUTH_TOKEN "SPrX61CtwXmZ97z56QahFNFC20AydfmX"
+
 
 #include <WiFi.h>
 #include <BlynkSimpleEsp32.h>
