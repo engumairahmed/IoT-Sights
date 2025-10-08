@@ -1,10 +1,10 @@
 
+#include "config.h"
 
 #include <WiFi.h>
 #include <BlynkSimpleEsp32.h>
 #include <ArduinoJson.h>
 
-#include "config.h"
 
 #include "WiFiModule.h"
 #include "WaterLevelMonitor.h"
@@ -16,7 +16,7 @@
 // --- Hardware Pins ---
 const int ledPinRed      = 14;   // WiFi Red LED
 const int ledPinGreen    = 13;   // WiFi Green LED
-const int motorRelayPin  = 21;
+const int motorRelayPin  = 22;
 const int acs712Pin      = 34;
 const int triggerPin     = 5;
 const int echoPin        = 4;
@@ -96,21 +96,6 @@ void IRAM_ATTR buttonPressHandler() {
 
 String deviceID;
 
-/*************  ✨ Windsurf Command ⭐  *************/
-/**
- * @brief Setup function for the Smart Hub.
- * 
- * This function initializes the serial port, generates a unique device ID, and sets up
- * the WiFi and Blynk connections. It also sets up the button and LEDs, and
- * initializes the other modules (Water Level Monitor, Water Pump Module, Energy
- * Meter Module, and CT Module).
- * 
- * @note The Blynk library is configured with the BLYNK_AUTH_TOKEN, and the
- * WiFi credentials are cleared and re-initialized.
- * 
- * @note The button and LEDs are set up as follows: the button is set to input pull-up
-
-/*******  cddcf1f8-a970-46f1-a880-a38454f43deb  *******/
 void setup() {
   Serial.begin(115200);
   delay(DELAY);
