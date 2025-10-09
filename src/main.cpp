@@ -31,13 +31,13 @@ const int blueLedPin    = 17; // Data status LED (Orange)
 const int orangeLedPin      = 16; // Data status LED (Blue)
 
 // --- Blynk state ---
-bool isSendingEnabled = true;   // Start in the 'sending' state
+bool isSendingEnabled = false;   // Start in the 'sending' state
 BlynkTimer timer;
 volatile bool buttonPressed = false;
 
 // --- Debounce ---
 volatile unsigned long lastButtonPress = 0;  // store last press time
-const unsigned long debounceDelay = 250;     // ms
+const unsigned long debounceDelay = 350;     // ms
 
 // --- Calibration ---
 const float voltageCalibration = 225.0f;
@@ -92,8 +92,8 @@ void sendDataToBlynk() {
       Blynk.virtualWrite(V5, current);
     }
     if (isWaterSensorConnected) {
-      float waterLevel = WaterLevelMonitor::getLevel();
-      Blynk.virtualWrite(V2, waterLevel);
+      float levelPercent = WaterLevelMonitor::getLevelPercent();
+      Blynk.virtualWrite(V2, levelPercent);
     }
   }
 }
@@ -140,8 +140,8 @@ void setup() {
   pinMode(blueLedPin, OUTPUT);
   pinMode(orangeLedPin, OUTPUT);
   
-  digitalWrite(blueLedPin, HIGH); // Green LED on initially
-  digitalWrite(orangeLedPin, LOW);
+  digitalWrite(blueLedPin, LOW); // Green LED on initially
+  digitalWrite(orangeLedPin, HIGH);
 
   attachInterrupt(digitalPinToInterrupt(buttonPin), buttonPressHandler, FALLING);
 
@@ -152,10 +152,15 @@ void setup() {
   isWaterSensorConnected = WaterLevelMonitor::isConnected();
 
   if (isWaterSensorConnected) {
+    WaterLevelMonitor::calibrate(tankMinDistance, tankMaxDistance);
     WaterPumpModule::begin(motorRelayPin);
     isWaterPumpConnected = true;
     WaterPumpModule::turnOn();
-  }
+    // Apply user-defined calibration
+    Serial.println("✅ Water Level Calibration Applied:");
+    Serial.printf("   Full tank distance: %.2f cm\n", tankMinDistance);
+    Serial.printf("   Empty tank distance: %.2f cm\n", tankMaxDistance);
+}
 
   EnergyMeterModule::begin(acs712Pin, voltageCalibration, sensitivity);
   isEnergyMeterConnected = EnergyMeterModule::isConnected();
@@ -200,17 +205,23 @@ void loop() {  // ✅ keep WiFi status & LEDs updated
   }
 
   // --- Read sensors ---
-  float currentWaterLevel = -1.0;
+ float currentWaterLevel = -1.0;
+  float waterLevelPercent = -1.0;
   if (isWaterSensorConnected) {
     currentWaterLevel = WaterLevelMonitor::getLevel();
+    waterLevelPercent = WaterLevelMonitor::getLevelPercent();
+    // Serial.printf("💧 Water Level: %.2f cm (%.1f%%)\n", currentWaterLevel, waterLevelPercent);
   }
 
   // --- Water Pump Control ---
   if (isWaterPumpConnected) {
+    float maxLevel = pumpOffLevelPercent;   // full tank
+    float minLevel = pumpOnLevelPercent;    // empty tank
+
     WaterPumpModule::update(
-      currentWaterLevel,
-      maxWaterLevel,
-      minWaterLevel,
+      waterLevelPercent,
+      maxLevel,
+      minLevel,
       autoModeEnabled,
       manualOverride
     );
@@ -237,7 +248,8 @@ void loop() {  // ✅ keep WiFi status & LEDs updated
 
     Serial.printf("💧 Water Level: ");
     if (isWaterSensorConnected) {
-      Serial.printf("%.2f cm", currentWaterLevel);
+      Serial.printf("💧 Water Level: %.2f cm (%.1f%%)\n", currentWaterLevel, waterLevelPercent);
+
     } else {
       Serial.printf("N/A");
     }

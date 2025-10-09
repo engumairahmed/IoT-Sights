@@ -5,8 +5,10 @@
 
 namespace WaterLevelMonitor {
     void begin(int triggerPin, int echoPin);
+    bool isConnected(); // Function to check for sensor presence
     float getLevel();
-    bool isConnected(); // New function to check for sensor presence
+    void calibrate(float minDist, float maxDist); // Set full & empty tank distances
+    float getLevelPercent();
 }
 
 #endif
